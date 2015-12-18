@@ -1,0 +1,159 @@
+comment "//" ;
+comment "/*" "*/" ;
+
+MDL.MDL ::= MDL_VERSION [IMPORT] [ 'export' GLOBAL_DECLARATION ] ;
+
+VERSION.MD_VERSION ::= 'mdl' FLOATING_LITERAL ;
+
+IMPORT_SIMPLE.IMPORT ::= 'import' [QUALIFIED_IMPORT] ;
+IMPORT_ALL.   IMPORT ::= MAYBE_EXPORT 'using' QUALIFIED_NAME 'import' '*' ;
+-- Watch out for the SIMPLE_NAME separator which is currently wrong.
+IMPORT_USING. IMPORT ::= MAYBE_EXPORT 'using' QUALIFIED_NAME 'import' [SIMPLE_NAME] ;
+
+Export.  MAYBE_EXPORT ::= 'export' ;
+NoExport.MAYBE_EXPORT ::= ;
+
+separator nonempty QUALIFIED_IMPORT "," ;
+
+QUALIFIED_IMPORT ::= MAYBE_COLONCOLON [SIMPLE_NAME] MAYBE_STAR ;
+
+-- Maybe I shouldn't have this rule. SIMPLE_NAME is separated by various things
+separator SIMPLE_NAME '::' ;
+
+COLONCOLON.MAYBE_COLONCOLON ::= '::';
+NOCOLONCOLON.MAYBE_COLONCOLON ::= ;
+
+ASTAR. MAYBE_STAR ::= '::' '*' ;
+NoSTAR.MAYBE_STAR ::= ;
+
+GlobAnn.  GLOBAL_DECLARATION ::= ANNOTATION_DECLARATION
+GlobConst.GLOBAL_DECLARATION ::= CONSTANT_DECLARATION
+GlobType. GLOBAL_DECLARATION ::= TYPE_DECLARATION
+GlobFun.  GLOBAL_DECLARATION ::= FUNCTION_DECLARATION
+
+AnnDecl.ANNOTATION_DECLARATION ::= 'annotation' SIMPLE_NAME PARAMETER_LIST ;
+
+ConstArgs.CONSTANT_DECLARATOR ::= SIMPLE_NAME ARGUMENT_LIST MAYBE_ANNOTATION_BLOCK ;
+ConstAss. CONSTANT_DECLARATOR ::= SIMPLE_NAME "=" CONDITIONAL_EXPRESSION MAYBE_ANNOTATION_BLOCK ;
+
+separator CONSTANT_DECLARATOR "," ;
+
+ConstDecl.CONSTANT_DECLARATION ::= 'const' ARRAY_TYPE [CONSTANT_DECLARATOR] ;
+
+AliasTyDecl. TYPE_DECLARATION ::= ALIAS_TYPE_DECLARATION ;
+StructTyDecl.TYPE_DECLARATION ::= STRUCT_TYPE_DECLARATION ;
+EnumTyDecl.  TYPE_DECLARATION ::= ENUM_TYPE_DECLARATION ;
+
+AliasTyDecl.ALIAS_TYPE_DECLARATION ::= 'typedef' TYPE SIMPLE_NAME ;
+
+StructField.STRUCT_FIELD_DECLARATOR ::= TYPE SIMPLE_NAME MAYBE_ANNOTATION_BLOCK ;
+StructFieldDef.STRUCT_FIELD_DECLARATOR ::= TYPE SIMPLE_NAME '=' EXPRESSION MAYBE_ANNOTATION_BLOCK ;
+
+separator STRUCT_FIELD_DECLARATOR "" ;
+
+StructTy.STRUCT_TYPE_DECLARATION ::= 'struct' SIMPLE_NAME MAYBE_ANNOTATION_BLOCK
+                                     '{' [STRUCT_FIELD_DECLARATOR] '}' ';' ;
+
+EnumVal.ENUM_VALUE_DECLARATOR ::= SIMPLE_NAME MAYBE_ANNOTATION_BLOCK ;
+EnumValDef.ENUM_VALUE_DECLARATOR ::= SIMPLE_NAME '=' ASSIGNMENT_EXPRESSION MAYBE_ANNOTATION_BLOCK ;
+
+separator nonempty ENUM_VALUE_DECLARATOR "," ;
+
+EnumTypeDecl.ENUM_TYPE_DECLARATION ::=
+  'enum' SIMPLE_NAME MAUBE_ANNOTATION_BLOCK '{'
+     [ENUM_VALUE_DECLARATOR]
+  '}' ';' ;
+
+VarArg.VARIABLE_DECLARATOR ::= SIMPLE_NAME ARGUMENT_LIST MAYBE_ANNOTATION_BLOCK ;
+VarAss.VARIABLE_DECLARATOR ::= SIMPLE_NAME '=' ASSIGNMENT_EXPRESSION MAYBE_ANNOTATION_BLOCK ;
+
+separator nonempty VARIABLE_DECLARATOR "," ;
+
+VarDecl.VARIABLE_DECLARATION ::= TYPE [VARIABLE_DECLARATOR] ';' ;
+
+FUNCTION_DECLARATION ::=
+  type MAYBE_ANNOTATION_BLOCK SIMPLE_NAME
+  '(' PARAMETER_LIST FREQUENCY_QUALIFIER MAYBE_ANNOTATION_BLOCK
+
+TRUE.LITERAL_EXPRESSION ::= 'true' ;
+FALSE.LITERAL_EXPRESSION ::= 'false' ;
+RAD.LITERAL_EXPRESSION ::= 'intensity_radiant_exitance' ;
+POW.LITERAL_EXPRESSION ::= 'intensity_power' ;
+INTEGER.LITERAL_EXPRESSION ::= Integer ;
+FLOATING.LITERAL_EXPRESSION ::= Double ;
+STRING.LITERAL_EXPRESSION ::= [String] ;
+
+separator nonempty String "" ;
+
+TYPE.TYPE ::= FREQUENCY_QUALIFIER ARRAY_TYPE ;
+
+ARRAY_TYPE.ARRAY_TYPE ::= SIMPLE_TYPE INDEX ;
+
+INDEX.INDEX ::= '[' ARR_ELEM ']' ;
+NOINDEX.INDEX ::= ;
+
+COND_EXPR.ARR_ELEM ::= CONDITIONAL_EXPRESSION ;
+SIMPL.    ARR_ELEM ::= '<' SIMPLE_NAME '>' ;
+NOARR.    ARR_ELEM ::= ;
+
+SIMPLE_TYPE ::= MAYBE_COLONCOLON RELATIVE_TYPE ;
+
+rules RELATIVE_TYPE ::= 'bool' | 'bool2' | 'bool3' | 'bool4' |
+ 'int' | 'int2' | 'int3' | 'int4' |
+ 'float' | 'float2' | 'float3' | 'float4' |
+ 'float2x2' | 'float2x3' | 'float2x4' | 
+ 'float3x2' | 'float3x3' | 'float3x4' |
+ 'float4x2' | 'float4x3' | 'float4x4' |
+ 'double' | 'double2' | 'double3' | 'double4' |
+ 'double2x2' | 'double2x3' | 'double2x4' |
+ 'double3x2' | 'double3x3' | 'double3x4' |
+ 'double4x2' | 'double4x3' | 'double4x4' |
+ 'color' | 'string' | 'bsdf' | 'edf' | 'vdf' |
+ 'light_profile' | 'bsdf_measurement' |
+ 'material' | 'material_emission' | 'material_geometry' |
+ 'material_surface' | 'material_volume' | 'intensity_mode' |
+ 'texture_2d' |  'texture_3d' | 'texture_cube' | 'texture_ptex' |
+  Ident MAYBE_RELATIVE_TYPE ;
+
+RELATIVE_TYPE.MAYBE_RELATIVE_TYPE ::= '::' RELATIVE_TYPE ;
+NO_TYPE.      MAYBE_REALTIVE_TYPE ::= ;
+
+VARYING.FREQUENCY_QUALIFIER ::= 'varying' ;
+UNIFORM.FREQUENCY_QUALIFIER ::= 'uniform' ;
+NO_FREQ.FREQUENCY_QUALIFIER ::= ;
+
+VariableDeclaration.VARIABLE_DECLARATION ::= TYPE [VARIABLE_DECLARATOR] ;
+
+VariableDeclarator.VARIABLE_DECLARATOR ::= SIMPLE_NAME DECLARATOR ANNOTATION_BLOCK ;
+
+separator nonempty VARIABLE_DECLARATOR "," ;
+
+ArgList.DECLARATOR ::= ARGUMENT_LIST ;
+AssExpr.DECLARATOR ::= ASSIGNMENT_EXPRESSION ;
+NoDecl. DECLARATOR ::= ;
+
+Expr.EXPRESSION ::= [ASSIGNMENT_EXPRESSION] ;
+
+ASSIGNMENT_EXPRESSION ::= TODO ;
+
+ParamAss.PARAMETER ::= TYPE SIMPLE_NAME "=" ASSIGNMENT_EXPRESSION MAYBE_ANNOTATION_BLOCK ;
+Param.   PARAMETER ::= TYPE SIMPLE_NAME MAYBE_ANNOTATION_BLOCK ;
+
+separator nonempty PARAMETER "," ;
+
+ParamList.PARAMETER_LIST ::= '(' [PARAMETER] ')' ;
+
+PosArg.POSITIONAL_ARGUMENT ::= ASSIGNMENT_EXPRESSION ;
+
+NamedArg.NAMED_ARGUMENT ::= SIMPLE_NAME ':' ASSIGNMENT_EXPRESSION ;
+
+separator NAMED_ARGUMENT "," ;
+
+NamedList.ARGUMENT_LIST ::= '(' [NAMED_ARGUMENT] ')' ;
+PosList.  ARGUMENT_LIST ::= '(' [POSITIONAL_ARGUMENT] [NAMED_ARGUMENT] ')' ;
+
+
+
+AnnBlock.ANNOTATION_BLOCK ::= '[' '[' [ANNOTATION] ']' ']'
+
+separator nonempty ANNOTATION "," ;
